@@ -12,10 +12,21 @@ describe Apcera::Stager do
     expect { Apcera::Stager.new }.to raise_error(Apcera::Error::StagerURLRequired)
   end
 
-  it "should initialize with the stager url" do
+  it "should initialize with the stager url passed as an argument" do
     stager = Apcera::Stager.new({:stager_url => @stager_url})
     stager.class.should == Apcera::Stager
     stager.stager_url.should == @stager_url
+  end
+
+  it "should initialize when the ENV variable STAGER_URL is present" do
+    begin
+      ENV["STAGER_URL"] = @stager_url
+      stager = Apcera::Stager.new
+      stager.class.should == Apcera::Stager
+      stager.stager_url.should == @stager_url
+    ensure
+      ENV["STAGER_URL"] = nil
+    end
   end
 
   context do
@@ -29,10 +40,12 @@ describe Apcera::Stager do
       @stager.root_path = File.join(spec, "spec", "tmp")
       @stager.pkg_path = File.join(@stager.root_path, "pkg.tar.gz")
       @stager.updated_pkg_path = File.join(@stager.root_path, "updated.tar.gz")
+      @stager.system_options = { :out => "/dev/null", :err => "/dev/null" }
 
       # We don't want to exit in tests.
       @stager.stub(:exit0r)
       @stager.stub(:output_error)
+      @stager.stub(:output)
     end
 
     after do
@@ -47,7 +60,7 @@ describe Apcera::Stager do
 
     context "download" do
       it "should download the app package to pkg.tar.gz" do
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
         File.exists?(@stager.pkg_path).should == true
@@ -57,14 +70,14 @@ describe Apcera::Stager do
         @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('invalid_download') do
-          expect { @stager.download }.to raise_error(Apcera::Error::PackageDownloadError)
+          expect { @stager.download }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
 
     context "extract" do
       it "should decompress the package to a supplied path" do
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
 
@@ -73,19 +86,74 @@ describe Apcera::Stager do
       end
 
       it "should bubble errors to fail" do
-        @stager.should_receive(:execute_app).and_raise
+        @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('valid_download') do
+        err = Apcera::Error::ExecuteError.new
+        @stager.should_receive(:execute_app).and_raise(err)
+
+        VCR.use_cassette('download') do
           @stager.download
         end
 
-        expect { @stager.extract(@appdir) }.to raise_error
+        expect { @stager.extract(@appdir) }.to raise_error(err)
+      end
+    end
+
+    context "execute" do
+      it "should execute commands" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract(@appdir)
+
+        @stager.execute("cat thing").should == nil
+        @stager.execute("cat #{File.join(@stager.app_path, "app", "Gemfile")}").should == true
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract(@appdir)
+
+        cmd = "cat thing"
+        expect {@stager.execute(cmd) }.to raise_error(Apcera::Error::ExecuteError, "failed to execute: #{cmd}.\n")
+      end
+    end
+
+    context "execute_app" do
+      it "should execute commands in app dir" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract(@appdir)
+
+        @stager.execute_app("cat thing").should == nil
+        @stager.execute_app("cat #{File.join("app", "Gemfile")}").should == true
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract(@appdir)
+
+        cmd = "cat thing"
+        expect {@stager.execute_app(cmd) }.to raise_error(Apcera::Error::ExecuteError, "failed to execute: #{cmd}.\n")
       end
     end
 
     context "upload" do
       it "should compress a new package and send to the staging coordinator" do
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
 
@@ -101,14 +169,14 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
 
         @stager.extract(@appdir)
 
         VCR.use_cassette('invalid_upload') do
-          expect { @stager.upload }.to raise_error
+          expect { @stager.upload }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
@@ -131,21 +199,21 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
 
         @stager.extract(@appdir)
 
         VCR.use_cassette('invalid_complete') do
-          expect { @stager.complete }.to raise_error
+          expect { @stager.complete }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
 
     context "snapshot" do
       it "should send a snapshot request to the staging coordinator" do
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
         @stager.extract(@appdir)
@@ -160,12 +228,12 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
         @stager.extract(@appdir)
         VCR.use_cassette('invalid_snapshot') do
-          expect { @stager.snapshot }.to raise_error
+          expect { @stager.snapshot }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
@@ -182,10 +250,10 @@ describe Apcera::Stager do
 
       it "should exit no matter what" do
         # Make sure we don't exit and that we called exit 1.
-        @stager.should_receive(:exit0r).with(1) { raise }
+        @stager.should_receive(:exit0r).with(1)
 
         VCR.use_cassette('invalid_fail') do
-          expect { @stager.fail }.to raise_error
+          @stager.fail
         end
       end
     end
@@ -199,7 +267,7 @@ describe Apcera::Stager do
 
       it "should throw errors" do
         VCR.use_cassette('invalid_metadata') do
-          expect { @stager.metadata }.to raise_error(Apcera::Error::PackageMetadataError)
+          expect { @stager.metadata }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
@@ -217,7 +285,7 @@ describe Apcera::Stager do
         @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('invalid_relaunch') do
-          expect { @stager.relaunch }.to raise_error
+          expect { @stager.relaunch }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end

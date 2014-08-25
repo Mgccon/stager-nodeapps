@@ -1,15 +1,14 @@
 module Apcera
   class Stager
-    attr_accessor :stager_url, :app_path, :root_path, :pkg_path, :updated_pkg_path
+    attr_accessor :stager_url, :app_path, :root_path, :pkg_path, :updated_pkg_path, :system_options
 
     PKG_NAME = "pkg.tar.gz"
     UPDATED_PKG_NAME = "updated.tar.gz"
 
     def initialize(options = {})
+      @stager_url = options[:stager_url] || ENV["STAGER_URL"]
       # Require stager url. Needed to talk to the Staging Coordinator.
-      unless @stager_url = options[:stager_url]
-        raise Apcera::Error::StagerURLRequired.new("stager_url required")
-      end
+      raise Apcera::Error::StagerURLRequired.new("stager_url required") unless @stager_url
 
       # Setup the environment, some test items here.
       setup_environment
@@ -17,13 +16,9 @@ module Apcera
 
     # Download a package from the staging coordinator.
     def download
-      response = RestClient.get(@stager_url + "/data") { |response, request, result| response }
-      if response.code == 200
-        File.open(@pkg_path, "wb") do |f|
-          f.write(response.to_str)
-        end
-      else
-        raise Apcera::Error::PackageDownloadError.new("failed to download package.")
+      response = RestClient.get(@stager_url + "/data")
+      File.open(@pkg_path, "wb") do |f|
+        f.write(response.to_str)
       end
     rescue => e
       fail e
@@ -32,9 +27,13 @@ module Apcera
     # Execute a command in the shell.
     # We don't want real commands in tests.
     def execute(cmd)
-      result = system(cmd)
-      if !result
-        raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+      Bundler.with_clean_env do
+        result = system(cmd, @system_options)
+        if !result
+          raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+        end
+
+        result
       end
     rescue => e
       fail e
@@ -42,10 +41,14 @@ module Apcera
 
     # Execute a command in the app dir. Useful helper.
     def execute_app(cmd)
-      Dir.chdir(@app_path) do |app_path|
-        result = system(cmd)
-        if !result
-          raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+      Bundler.with_clean_env do
+        Dir.chdir(@app_path) do |app_path|
+          result = system(cmd, @system_options)
+          if !result
+            raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+          end
+
+          result
         end
       end
     rescue => e
@@ -83,12 +86,8 @@ module Apcera
 
     # Get metadata for the package being staged.
     def metadata
-      response = RestClient.get(@stager_url+"/metadata") { |response, request, result| response }
-      if response.code == 200
-        return JSON.parse(response.to_s)
-      else
-        raise Apcera::Error::PackageMetadataError.new("failed to get package metadata.\n")
-      end
+      response = RestClient.get(@stager_url+"/metadata")
+      return JSON.parse(response.to_s)
     rescue => e
       output_error "Error: #{e.message}.\n"
       raise e
@@ -120,7 +119,6 @@ module Apcera
     # Fail the stager, something went wrong.
     def fail(error = nil)
       output_error "Error: #{error.message}.\n" if error
-
       RestClient.post(@stager_url+"/failed", {})
     rescue => e
       output_error "Error: #{e.message}.\n"
@@ -148,6 +146,7 @@ module Apcera
       @root_path = "/"
       @pkg_path = File.join(@root_path, PKG_NAME)
       @updated_pkg_path = File.join(@root_path, UPDATED_PKG_NAME)
+      @system_options = {}
     end
   end
 end
