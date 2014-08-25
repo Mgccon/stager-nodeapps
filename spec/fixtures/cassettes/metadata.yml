@@ -22,6 +22,29 @@ http_interactions:
       encoding: UTF-8
       string: |-
         {
+          "dependencies": [
+            {"type": "os", "name": "linux"},
+            {"type": "package", "name": "build-essential"}
+          ],
+          "provides": [
+            {"type": "runtime", "name": "ruby"},
+            {"type": "runtime", "name": "ruby-1.9"}
+          ],
+          "environment": {
+            "PATH": "/opt/apcera/ruby-1.9.3/bin:$PATH",
+            "START_COMMAND": "./startme",
+            "START_PATH": "/app"
+          },
+          "templates": [
+            {
+              "path": "foo",
+              "left_delimiter": "<<",
+              "right_delimiter": ">>"
+            },
+            {
+              "path": "bar"
+            }
+          ]
         }
     http_version: 
   recorded_at: Wed, 14 Aug 2013 08:52:04 GMT

@@ -211,6 +211,24 @@ describe Apcera::Stager do
       end
     end
 
+    context "done" do
+      it "should send done to the staging coordinator" do
+        @stager.should_receive(:exit0r).with(0)
+
+        VCR.use_cassette('done') do
+          @stager.done
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid_done') do
+          expect { @stager.done }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
+        end
+      end
+    end
+
     context "snapshot" do
       it "should send a snapshot request to the staging coordinator" do
         VCR.use_cassette('download') do
@@ -259,7 +277,7 @@ describe Apcera::Stager do
     end
 
     context "metadata" do
-      it "should recieve package metadata" do
+      it "should recieve package metadata and cache it" do
         VCR.use_cassette('metadata') do
           @stager.metadata.class.should == Hash
         end
@@ -286,6 +304,44 @@ describe Apcera::Stager do
 
         VCR.use_cassette('invalid_relaunch') do
           expect { @stager.relaunch }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
+        end
+      end
+    end
+
+    context "start_command" do
+      it "should return the package start command" do
+        VCR.use_cassette('metadata') do
+          @stager.start_command.should == "./startme"
+        end
+      end
+    end
+
+    context "start_path" do
+      it "should return the package start path" do
+        VCR.use_cassette('metadata') do
+          @stager.start_path.should == "/app"
+        end
+      end
+    end
+
+    context "exit0r" do
+      before do
+        @stager.unstub(:exit0r)
+      end
+
+      it "should wrap successful exit" do
+        begin
+          @stager.exit0r(0)
+        rescue SystemExit => e
+          e.status.should == 0
+        end
+      end
+
+      it "should wrap errored exit" do
+        begin
+          @stager.exit0r(1)
+        rescue SystemExit => e
+          e.status.should == 1
         end
       end
     end

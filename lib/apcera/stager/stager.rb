@@ -6,8 +6,8 @@ module Apcera
     UPDATED_PKG_NAME = "updated.tar.gz"
 
     def initialize(options = {})
-      @stager_url = options[:stager_url] || ENV["STAGER_URL"]
       # Require stager url. Needed to talk to the Staging Coordinator.
+      @stager_url = options[:stager_url] || ENV["STAGER_URL"]
       raise Apcera::Error::StagerURLRequired.new("stager_url required") unless @stager_url
 
       # Setup the environment, some test items here.
@@ -87,7 +87,7 @@ module Apcera
     # Get metadata for the package being staged.
     def metadata
       response = RestClient.get(@stager_url+"/metadata")
-      return JSON.parse(response.to_s)
+      return @metadata = JSON.parse(response.to_s)
     rescue => e
       output_error "Error: #{e.message}.\n"
       raise e
@@ -116,6 +116,16 @@ module Apcera
       done
     end
 
+    # Returns the start command for the package.
+    def start_command
+      self.metadata["environment"]["START_COMMAND"]
+    end
+
+    # Returns the start path for the package.
+    def start_path
+      self.metadata["environment"]["START_PATH"]
+    end
+
     # Fail the stager, something went wrong.
     def fail(error = nil)
       output_error "Error: #{error.message}.\n" if error
@@ -142,7 +152,7 @@ module Apcera
     end
 
     def setup_environment
-      # When staging we use the root path.
+      # When staging we use the root path. These are overridden in tests.
       @root_path = "/"
       @pkg_path = File.join(@root_path, PKG_NAME)
       @updated_pkg_path = File.join(@root_path, UPDATED_PKG_NAME)

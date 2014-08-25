@@ -24,5 +24,5 @@ http_interactions:
       encoding: US-ASCII
       string: OK
     http_version: 
-  recorded_at: Mon, 25 Aug 2014 02:00:57 GMT
+  recorded_at: Mon, 25 Aug 2014 02:00:56 GMT
 recorded_with: VCR 2.9.2
