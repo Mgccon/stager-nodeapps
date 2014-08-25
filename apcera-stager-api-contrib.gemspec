@@ -6,8 +6,9 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Josh Ellithorpe"]
   gem.email         = ["josh@apcera.com"]
   gem.description   = %q{Continuum Stager api library}
-  gem.summary       = %q{Continuum Stager api library}
-  gem.homepage      = ""
+  gem.summary       = %q{Continuum Stager api library which makes it super easy to write stagers for Apcera's Continuum.}
+  gem.homepage      = "http://apcera.com"
+  gem.license       = "MIT"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
