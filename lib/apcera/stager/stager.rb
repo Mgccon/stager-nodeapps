@@ -84,9 +84,107 @@ module Apcera
       fail e
     end
 
+    # Add environment variable to package.
+    def environment_add(key, value)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "environment",
+        :action => "add",
+        :key => key,
+        :value => value
+      })
+    rescue => e
+      fail e
+    end
+
+    # Delete environment variable from package.
+    def environment_remove(key, value)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "environment",
+        :action => "remove",
+        :key => key,
+        :value => value
+      })
+    rescue => e
+      fail e
+    end
+
+    # Add provides to package.
+    def provides_add(type, name)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "provides",
+        :action => "add",
+        :type => type,
+        :name => name
+      })
+    rescue => e
+      fail e
+    end
+
+    # Delete provides from package.
+    def provides_remove(key, value)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "provides",
+        :action => "remove",
+        :type => type,
+        :name => name
+      })
+    rescue => e
+      fail e
+    end
+
+    # Add dependencies to package.
+    def dependencies_add(type, name)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "dependencies",
+        :action => "add",
+        :type => type,
+        :name => name
+      })
+    rescue => e
+      fail e
+    end
+
+    # Delete dependencies from package.
+    def dependencies_remove(type, name)
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "dependencies",
+        :action => "remove",
+        :type => type,
+        :name => name
+      })
+    rescue => e
+      fail e
+    end
+
+    # Add template to package.
+    def templates_add(path, left_delimiter = "{{", right_delimiter = "}}")
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "templates",
+        :action => "add",
+        :path => path,
+        :left_delimiter => left_delimiter,
+        :right_delimiter => right_delimiter
+      })
+    rescue => e
+      fail e
+    end
+
+    # Delete template from package.
+    def templates_remove(path, left_delimiter = "{{", right_delimiter = "}}")
+      response = RestClient.post(@stager_url+"/meta", {
+        :resource => "templates",
+        :action => "remove",
+        :path => path,
+        :left_delimiter => left_delimiter,
+        :right_delimiter => right_delimiter
+      })
+    rescue => e
+      fail e
+    end
+
     # Get metadata for the package being staged.
     def metadata
-      response = RestClient.get(@stager_url+"/metadata")
+      response = RestClient.get(@stager_url+"/meta")
       return @metadata = JSON.parse(response.to_s)
     rescue => e
       output_error "Error: #{e.message}.\n"

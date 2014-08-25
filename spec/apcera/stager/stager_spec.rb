@@ -69,7 +69,7 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('invalid_download') do
+        VCR.use_cassette('invalid/download') do
           expect { @stager.download }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -175,7 +175,7 @@ describe Apcera::Stager do
 
         @stager.extract(@appdir)
 
-        VCR.use_cassette('invalid_upload') do
+        VCR.use_cassette('invalid/upload') do
           expect { @stager.upload }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -183,7 +183,7 @@ describe Apcera::Stager do
 
     context "complete" do
       it "should compress a new package and send to the staging coordinator then be done" do
-        VCR.use_cassette('valid_download') do
+        VCR.use_cassette('download') do
           @stager.download
         end
 
@@ -205,7 +205,7 @@ describe Apcera::Stager do
 
         @stager.extract(@appdir)
 
-        VCR.use_cassette('invalid_complete') do
+        VCR.use_cassette('invalid/complete') do
           expect { @stager.complete }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -223,7 +223,7 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('invalid_done') do
+        VCR.use_cassette('invalid/done') do
           expect { @stager.done }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -250,7 +250,7 @@ describe Apcera::Stager do
           @stager.download
         end
         @stager.extract(@appdir)
-        VCR.use_cassette('invalid_snapshot') do
+        VCR.use_cassette('invalid/snapshot') do
           expect { @stager.snapshot }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -270,7 +270,7 @@ describe Apcera::Stager do
         # Make sure we don't exit and that we called exit 1.
         @stager.should_receive(:exit0r).with(1)
 
-        VCR.use_cassette('invalid_fail') do
+        VCR.use_cassette('invalid/fail') do
           @stager.fail
         end
       end
@@ -284,7 +284,7 @@ describe Apcera::Stager do
       end
 
       it "should throw errors" do
-        VCR.use_cassette('invalid_metadata') do
+        VCR.use_cassette('invalid/metadata') do
           expect { @stager.metadata }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -302,7 +302,7 @@ describe Apcera::Stager do
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
-        VCR.use_cassette('invalid_relaunch') do
+        VCR.use_cassette('invalid/relaunch') do
           expect { @stager.relaunch }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
@@ -320,6 +320,102 @@ describe Apcera::Stager do
       it "should return the package start path" do
         VCR.use_cassette('metadata') do
           @stager.start_path.should == "/app"
+        end
+      end
+    end
+
+    context "environment_add" do
+      it "should add an environment variable" do
+        VCR.use_cassette('environment_add') do
+          @stager.environment_add("TEST_VAR", "foo")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/environment_add') do
+          expect { @stager.environment_add("TEST_VAR", "foo") }.to raise_error
+        end
+      end
+    end
+
+    context "environment_remove" do
+      it "should environment_remove an environment variable" do
+        VCR.use_cassette('environment_remove') do
+          @stager.environment_remove("TEST_VAR", "foo")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/environment_remove') do
+          expect { @stager.environment_remove("TEST_VAR", "foo") }.to raise_error
+        end
+      end
+    end
+
+    context "provides_add" do
+      it "should add to its list of provides" do
+        VCR.use_cassette('provides_add') do
+          @stager.provides_add("os", "linux")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/provides_add') do
+          expect { @stager.provides_add("os", "linux") }.to raise_error
+        end
+      end
+    end
+
+    context "provides_remove" do
+      it "should remove from its list of provides" do
+        VCR.use_cassette('provides_remove') do
+          @stager.provides_remove("os", "linux")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/provides_remove') do
+          expect { @stager.provides_remove("os", "linux") }.to raise_error
+        end
+      end
+    end
+
+    context "dependencies_add" do
+      it "should add to its list of dependencies" do
+        VCR.use_cassette('dependencies_add') do
+          @stager.dependencies_add("os", "linux")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/dependencies_add') do
+          expect { @stager.dependencies_add("os", "linux") }.to raise_error
+        end
+      end
+    end
+
+    context "dependencies_remove" do
+      it "should remove from its list of dependencies" do
+        VCR.use_cassette('dependencies_remove') do
+          @stager.dependencies_remove("os", "linux")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/dependencies_remove') do
+          expect { @stager.dependencies_remove("os", "linux") }.to raise_error
         end
       end
     end

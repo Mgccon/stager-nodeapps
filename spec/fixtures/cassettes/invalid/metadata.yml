@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://example.com/metadata
+    uri: https://example.com/meta
     body:
       encoding: US-ASCII
       string: ''

@@ -1,0 +1,53 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://example.com/meta
+    body:
+      encoding: US-ASCII
+      string: resource=environment&action=remove&key=TEST_VAR&value=foo
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+  response:
+    status:
+      code: 200
+      message: 
+    headers:
+      Content-Type:
+      - text/html
+      Date:
+      - Mon, 25 Aug 2014 22:37:32 GMT
+      Content-Length:
+      - '4'
+    body:
+      encoding: US-ASCII
+      string: OK
+    http_version: 
+  recorded_at: Mon, 25 Aug 2014 22:37:33 GMT
+- request:
+    method: post
+    uri: http://example.com/done
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers: {}
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/html; charset=ISO-8859-1
+      Date:
+      - Mon, 25 Aug 2014 02:00:56 GMT
+      Content-Length:
+      - '2'
+      Connection:
+      - close
+    body:
+      encoding: US-ASCII
+      string: OK
+    http_version: 
+  recorded_at: Mon, 25 Aug 2014 02:00:56 GMT
+recorded_with: VCR 2.9.2
