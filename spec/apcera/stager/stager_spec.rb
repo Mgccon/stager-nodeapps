@@ -72,7 +72,7 @@ describe Apcera::Stager do
         File.exists?(File.join(@stager.root_path, @appdir)).should == true
       end
 
-      it "should throw errors" do
+      it "should bubble errors to fail" do
         @stager.stub(:execute_app).and_raise
 
         VCR.use_cassette('valid_download') do
