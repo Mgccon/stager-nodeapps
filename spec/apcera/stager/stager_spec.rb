@@ -54,7 +54,7 @@ describe Apcera::Stager do
       end
 
       it "should bubble errors to fail" do
-        @stager.stub(:exit0r) { raise }
+        @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('invalid_download') do
           expect { @stager.download }.to raise_error(Apcera::Error::PackageDownloadError)
@@ -73,7 +73,7 @@ describe Apcera::Stager do
       end
 
       it "should bubble errors to fail" do
-        @stager.stub(:execute_app).and_raise
+        @stager.should_receive(:execute_app).and_raise
 
         VCR.use_cassette('valid_download') do
           @stager.download
@@ -99,7 +99,7 @@ describe Apcera::Stager do
       end
 
       it "should bubble errors to fail" do
-        @stager.stub(:exit0r).with(1) { raise }
+        @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('valid_download') do
           @stager.download
