@@ -1,0 +1,28 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://example.com/metadata
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers: {}
+  response:
+    status:
+      code: 404
+      message: OK
+    headers:
+      Date:
+      - Wed, 14 Aug 2013 08:52:04 GMT
+      Transfer-Encoding:
+      - chunked
+      Content-Type:
+      - application/json;charset=UTF-8
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+        }
+    http_version: 
+  recorded_at: Wed, 14 Aug 2013 08:52:04 GMT
+recorded_with: VCR 2.5.0

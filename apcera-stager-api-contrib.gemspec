@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |gem|
-  gem.add_dependency 'httparty'
+  gem.add_dependency "rest-client"
   gem.add_dependency 'json'
 
   gem.authors       = ["Josh Ellithorpe"]
@@ -20,4 +20,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'webmock', '1.11'
   gem.add_development_dependency 'simplecov'
+  gem.add_development_dependency 'vcr'
 end
