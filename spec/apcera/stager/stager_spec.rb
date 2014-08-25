@@ -420,6 +420,50 @@ describe Apcera::Stager do
       end
     end
 
+    context "templates_add" do
+      it "should add to its list of templates" do
+        VCR.use_cassette('templates_add') do
+          @stager.templates_add("/path/to/template")
+        end
+      end
+
+      it "should add to its list of templates with delimiters" do
+        VCR.use_cassette('templates_add') do
+          @stager.templates_add("/path/to/template", "{{", "}}")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/templates_add') do
+          expect { @stager.templates_add("/path/to/template") }.to raise_error
+        end
+      end
+    end
+
+    context "templates_remove" do
+      it "should remove from its list of templates" do
+        VCR.use_cassette('templates_remove') do
+          @stager.templates_remove("/path/to/template")
+        end
+      end
+
+      it "should remove from its list of templates with delimiters" do
+        VCR.use_cassette('templates_remove') do
+          @stager.templates_remove("/path/to/template", "{{", "}}")
+        end
+      end
+
+      it "should bubble errors to fail" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        VCR.use_cassette('invalid/templates_remove') do
+          expect { @stager.templates_remove("/path/to/template") }.to raise_error
+        end
+      end
+    end
+
     context "exit0r" do
       before do
         @stager.unstub(:exit0r)
