@@ -41,6 +41,7 @@ module Apcera
 
     # Execute a command in the app dir. Useful helper.
     def execute_app(cmd)
+      raise_app_path_error if @app_path == nil
       Bundler.with_clean_env do
         Dir.chdir(@app_path) do |app_path|
           result = system(cmd, @system_options)
@@ -67,6 +68,7 @@ module Apcera
 
     # Upload the new package to the staging coordinator
     def upload
+      raise_app_path_error if @app_path == nil
       app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
       execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
 
@@ -271,6 +273,10 @@ module Apcera
     end
 
     private
+
+    def raise_app_path_error
+      raise Apcera::Error::AppPathError.new("app path not set, please run extract!\n")
+    end
 
     def setup_environment
       # When staging we use the root path. These are overridden in tests.

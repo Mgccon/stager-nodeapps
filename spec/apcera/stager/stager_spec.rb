@@ -128,19 +128,28 @@ describe Apcera::Stager do
         VCR.use_cassette('download') do
           @stager.download
         end
-
-        @stager.extract(@appdir)
       end
 
       it "should execute commands in app dir with clean bundler environment" do
         Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
 
+        @stager.extract(@appdir)
+
         @stager.execute_app("cat thing").should == nil
         @stager.execute_app("cat #{File.join("app", "Gemfile")}").should == true
       end
 
+      it "should bubble errors to fail when app path is missing (no extract)" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        cmd = "cat thing"
+        expect {@stager.execute_app(cmd) }.to raise_error(Apcera::Error::AppPathError, "app path not set, please run extract!\n")
+      end
+
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
+
+        @stager.extract(@appdir)
 
         cmd = "cat thing"
         expect {@stager.execute_app(cmd) }.to raise_error(Apcera::Error::ExecuteError, "failed to execute: #{cmd}.\n")
@@ -152,11 +161,11 @@ describe Apcera::Stager do
         VCR.use_cassette('download') do
           @stager.download
         end
-
-        @stager.extract(@appdir)
       end
 
       it "should compress a new package and send to the staging coordinator" do
+        @stager.extract(@appdir)
+
         VCR.use_cassette('upload') do
           @stager.upload
         end
@@ -165,13 +174,24 @@ describe Apcera::Stager do
       end
 
       it "should compress using tar czf" do
+        @stager.extract(@appdir)
+
         @stager.should_receive(:execute_app).with("cd #{@stager.app_path}/.. && tar czf #{@stager.updated_pkg_path} #{@appdir}").and_return
 
         @stager.upload
       end
 
+      it "should bubble errors to fail when app path is missing (no extract)" do
+        @stager.should_receive(:exit0r).with(1) { raise }
+
+        cmd = "cat thing"
+        expect {@stager.upload }.to raise_error(Apcera::Error::AppPathError, "app path not set, please run extract!\n")
+      end
+
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
+
+        @stager.extract(@appdir)
 
         VCR.use_cassette('invalid/upload') do
           expect { @stager.upload }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
