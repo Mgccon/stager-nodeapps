@@ -84,16 +84,18 @@ describe Apcera::Stager do
 
       it "should decompress the package to a supplied path" do
         @stager.extract(@appdir)
-        File.exists?(File.join(@stager.root_path, @appdir)).should == true
+        expected_path = File.join(@stager.root_path, @appdir)
+        File.exists?(expected_path).should == true
+        @stager.app_path.should == expected_path
       end
 
       it "should bubble errors to fail" do
         @stager.should_receive(:exit0r).with(1) { raise }
 
         err = Apcera::Error::ExecuteError.new
-        @stager.should_receive(:execute_app).and_raise(err)
+        @stager.should_receive(:execute_app).with("tar -zxf #{@stager.pkg_path}").and_raise(err)
 
-        expect { @stager.extract(@appdir) }.to raise_error(err)
+        expect { @stager.extract(@appdir) }.to raise_error(err.class)
       end
     end
 
@@ -160,6 +162,12 @@ describe Apcera::Stager do
         end
 
         File.exists?(@stager.updated_pkg_path).should == true
+      end
+
+      it "should compress using tar czf" do
+        @stager.should_receive(:execute_app).with("tar czf #{@stager.updated_pkg_path} #{@stager.app_path}").and_return
+
+        @stager.upload
       end
 
       it "should bubble errors to fail" do
