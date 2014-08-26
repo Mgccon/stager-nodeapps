@@ -183,9 +183,9 @@ module Apcera
     end
 
     # Get metadata for the package being staged.
-    def metadata
+    def meta
       response = RestClient.get(@stager_url+"/meta")
-      return @metadata = JSON.parse(response.to_s)
+      return JSON.parse(response.to_s)
     rescue => e
       output_error "Error: #{e.message}.\n"
       raise e
@@ -216,12 +216,22 @@ module Apcera
 
     # Returns the start command for the package.
     def start_command
-      self.metadata["environment"]["START_COMMAND"]
+      self.meta["environment"]["START_COMMAND"]
+    end
+
+    # Easily set the start command
+    def start_command=(val)
+      self.environment_add("START_COMMAND", val)
     end
 
     # Returns the start path for the package.
     def start_path
-      self.metadata["environment"]["START_PATH"]
+      self.meta["environment"]["START_PATH"]
+    end
+
+    # Easily set the start path
+    def start_path=(val)
+      self.environment_add("START_PATH", val)
     end
 
     # Fail the stager, something went wrong.

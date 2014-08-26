@@ -257,7 +257,7 @@ describe Apcera::Stager do
     end
 
     context "fail" do
-      it "should have a fail hook" do
+      it "should have a fail hook that exits with exit code 1" do
         # Make sure we don't exit and that we called exit 1.
         @stager.should_receive(:exit0r).with(1)
 
@@ -265,27 +265,18 @@ describe Apcera::Stager do
           @stager.fail.should == "OK"
         end
       end
-
-      it "should exit no matter what" do
-        # Make sure we don't exit and that we called exit 1.
-        @stager.should_receive(:exit0r).with(1)
-
-        VCR.use_cassette('invalid/fail') do
-          @stager.fail
-        end
-      end
     end
 
-    context "metadata" do
+    context "meta" do
       it "should recieve package metadata and cache it" do
         VCR.use_cassette('metadata') do
-          @stager.metadata.class.should == Hash
+          @stager.meta.class.should == Hash
         end
       end
 
       it "should throw errors" do
         VCR.use_cassette('invalid/metadata') do
-          expect { @stager.metadata }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
+          expect { @stager.meta }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
         end
       end
     end
@@ -314,12 +305,24 @@ describe Apcera::Stager do
           @stager.start_command.should == "./startme"
         end
       end
+
+      it "should allow you to set the start command" do
+        VCR.use_cassette('environment_add') do
+          @stager.start_command = "./startme"
+        end
+      end
     end
 
     context "start_path" do
       it "should return the package start path" do
         VCR.use_cassette('metadata') do
           @stager.start_path.should == "/app"
+        end
+      end
+
+      it "should allow you to set the start path" do
+        VCR.use_cassette('environment_add') do
+          @stager.start_path = "/app"
         end
       end
     end
