@@ -165,7 +165,7 @@ describe Apcera::Stager do
       end
 
       it "should compress using tar czf" do
-        @stager.should_receive(:execute_app).with("cd #{@stager.app_path} && tar czf #{@stager.updated_pkg_path} #{@stager.app_path}").and_return
+        @stager.should_receive(:execute_app).with("cd #{@stager.app_path} && tar czf #{@stager.updated_pkg_path} .").and_return
 
         @stager.upload
       end
