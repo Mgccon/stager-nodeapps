@@ -100,7 +100,9 @@ describe Apcera::Stager do
     end
 
     context "execute" do
-      it "should execute commands" do
+      it "should execute commands with clean bundler environment" do
+        Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
+
         VCR.use_cassette('download') do
           @stager.download
         end
@@ -126,7 +128,9 @@ describe Apcera::Stager do
     end
 
     context "execute_app" do
-      it "should execute commands in app dir" do
+      it "should execute commands in app dir with clean bundler environment" do
+        Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
+
         VCR.use_cassette('download') do
           @stager.download
         end
