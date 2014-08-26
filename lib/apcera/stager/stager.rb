@@ -263,7 +263,7 @@ module Apcera
 
     def setup_environment
       # When staging we use the root path. These are overridden in tests.
-      @root_path = "/"
+      @root_path = "/tmp"
       @pkg_path = File.join(@root_path, PKG_NAME)
       @updated_pkg_path = File.join(@root_path, UPDATED_PKG_NAME)
       @system_options = {}
