@@ -249,15 +249,17 @@ module Apcera
       exit code
     end
 
-    private
-
+    # Output to stderr
     def output_error(text)
       $stderr.puts text
     end
 
+    # Output to stdout
     def output(text)
       $stdout.puts text
     end
+
+    private
 
     def setup_environment
       # When staging we use the root path. These are overridden in tests.

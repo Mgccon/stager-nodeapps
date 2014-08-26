@@ -471,6 +471,28 @@ describe Apcera::Stager do
       end
     end
 
+    context "output" do
+      before do
+        @stager.unstub(:output)
+      end
+
+      it "should print to stdout" do
+        $stdout.should_receive(:puts).with("test")
+        @stager.output("test")
+      end
+    end
+
+    context "output_error" do
+      before do
+        @stager.unstub(:output_error)
+      end
+
+      it "should print to stderr" do
+        $stderr.should_receive(:puts).with("test")
+        @stager.output_error("test")
+      end
+    end
+
     context "exit0r" do
       before do
         @stager.unstub(:exit0r)
