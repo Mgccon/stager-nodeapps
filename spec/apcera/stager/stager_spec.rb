@@ -3,29 +3,29 @@ require 'spec_helper'
 describe Apcera::Stager do
   before do
     @appdir = "site"
-
-    # See mock server directory for setup!
     @stager_url = "http://example.com"
   end
 
-  it "should raise an exception when initialized without a stager url" do
-    expect { Apcera::Stager.new }.to raise_error(Apcera::Error::StagerURLRequired)
-  end
+  describe "initialize" do
+    it "should raise an exception when initialized without a stager url" do
+      expect { Apcera::Stager.new }.to raise_error(Apcera::Error::StagerURLRequired)
+    end
 
-  it "should initialize with the stager url passed as an argument" do
-    stager = Apcera::Stager.new({:stager_url => @stager_url})
-    stager.class.should == Apcera::Stager
-    stager.stager_url.should == @stager_url
-  end
-
-  it "should initialize when the ENV variable STAGER_URL is present" do
-    begin
-      ENV["STAGER_URL"] = @stager_url
-      stager = Apcera::Stager.new
+    it "should initialize with the stager url passed as an argument" do
+      stager = Apcera::Stager.new({:stager_url => @stager_url})
       stager.class.should == Apcera::Stager
       stager.stager_url.should == @stager_url
-    ensure
-      ENV["STAGER_URL"] = nil
+    end
+
+    it "should initialize when the ENV variable STAGER_URL is present" do
+      begin
+        ENV["STAGER_URL"] = @stager_url
+        stager = Apcera::Stager.new
+        stager.class.should == Apcera::Stager
+        stager.stager_url.should == @stager_url
+      ensure
+        ENV["STAGER_URL"] = nil
+      end
     end
   end
 
