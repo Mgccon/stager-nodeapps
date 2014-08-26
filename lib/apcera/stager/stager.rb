@@ -67,7 +67,7 @@ module Apcera
 
     # Upload the new package to the staging coordinator
     def upload
-      execute_app("tar czf #{@updated_pkg_path} .")
+      execute_app("tar czf #{@updated_pkg_path} #{@app_path}")
 
       sha1 = Digest::SHA1.file(@updated_pkg_path)
       File.open(@updated_pkg_path, "rb") do |f|
