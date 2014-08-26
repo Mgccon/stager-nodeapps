@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {spec}/*`.split("\n")
   gem.name          = "continuum-stager-api"
   gem.require_paths = ["lib"]
-  gem.version       = "0.1.2"
+  gem.version       = "0.1.3"
 
   gem.add_development_dependency 'rspec', '~> 2.6.0'
   gem.add_development_dependency 'rake'
