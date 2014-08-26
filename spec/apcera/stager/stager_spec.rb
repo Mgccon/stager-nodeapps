@@ -165,7 +165,7 @@ describe Apcera::Stager do
       end
 
       it "should compress using tar czf" do
-        @stager.should_receive(:execute_app).with("cd #{@stager.app_path}/.. && tar czf #{@stager.updated_pkg_path} ./#{@appdir}").and_return
+        @stager.should_receive(:execute_app).with("cd #{@stager.app_path}/.. && tar czf #{@stager.updated_pkg_path} #{@appdir}").and_return
 
         @stager.upload
       end
@@ -389,7 +389,13 @@ describe Apcera::Stager do
     context "dependencies_add" do
       it "should add to its list of dependencies" do
         VCR.use_cassette('dependencies_add') do
-          @stager.dependencies_add("os", "linux")
+          @stager.dependencies_add("os", "someos").should == true
+        end
+      end
+
+      it "should return false if the dependency is already there" do
+        VCR.use_cassette('dependencies_add') do
+          @stager.dependencies_add("os", "linux").should == false
         end
       end
 
@@ -406,6 +412,12 @@ describe Apcera::Stager do
       it "should remove from its list of dependencies" do
         VCR.use_cassette('dependencies_remove') do
           @stager.dependencies_remove("os", "linux")
+        end
+      end
+
+      it "should return false if the dependency doesn't exist" do
+        VCR.use_cassette('dependencies_remove') do
+          @stager.dependencies_remove("os", "someos").should == false
         end
       end
 

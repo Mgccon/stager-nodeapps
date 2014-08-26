@@ -67,7 +67,7 @@ module Apcera
 
     # Upload the new package to the staging coordinator
     def upload
-      app_dir = File.join(".", @app_path.sub(@root_path, ""))
+      app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
       execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
 
       sha1 = Digest::SHA1.file(@updated_pkg_path)
@@ -135,24 +135,34 @@ module Apcera
 
     # Add dependencies to package.
     def dependencies_add(type, name)
+      exists = self.meta["dependencies"].detect { |dep| dep["type"] == type && dep["name"] == name }
+      return false if exists
+
       response = RestClient.post(@stager_url+"/meta", {
         :resource => "dependencies",
         :action => "add",
         :type => type,
         :name => name
       })
+
+      true
     rescue => e
       fail e
     end
 
     # Delete dependencies from package.
     def dependencies_remove(type, name)
+      exists = self.meta["dependencies"].detect { |dep| dep["type"] == type && dep["name"] == name}
+      return false if !exists
+
       response = RestClient.post(@stager_url+"/meta", {
         :resource => "dependencies",
         :action => "remove",
         :type => type,
         :name => name
       })
+
+      true
     rescue => e
       fail e
     end
