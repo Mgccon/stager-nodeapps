@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
   gem.test_files    = `git ls-files -- {spec}/*`.split("\n")
-  gem.name          = "apcera-stager-api"
+  gem.name          = "continuum-stager-api"
   gem.require_paths = ["lib"]
   gem.version       = "0.1.0"
 

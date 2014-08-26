@@ -34,7 +34,7 @@ describe Apcera::Stager do
       @stager = Apcera::Stager.new({:stager_url => @stager_url})
 
       # Best way to get our current path is to get the gem_dir!
-      spec = Gem::Specification.find_by_name("apcera-stager-api").gem_dir
+      spec = Gem::Specification.find_by_name("continuum-stager-api").gem_dir
 
       # Lets write files in spec/tmp for tests!
       @stager.root_path = File.join(spec, "spec", "tmp")
@@ -51,7 +51,7 @@ describe Apcera::Stager do
     after do
       # Don't trust urls above, they could be changed in tests.
       # This does an actual delete and we want to be specific.
-      spec = Gem::Specification.find_by_name("apcera-stager-api").gem_dir
+      spec = Gem::Specification.find_by_name("continuum-stager-api").gem_dir
       test_files = File.join(spec, "spec", "tmp", "*")
 
       # Remove the test files.

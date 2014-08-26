@@ -1,4 +1,4 @@
-# apcera-stager-api
+# continuum-stager-api
 
 Simple gem to assist users writing custom Continuum Stagers.
 
@@ -7,7 +7,7 @@ Simple gem to assist users writing custom Continuum Stagers.
 Add to your `Gemfile`:
 
 ```ruby
-gem "apcera-stager-api"
+gem "continuum-stager-api"
 ```
 
 Then `bundle install`.
