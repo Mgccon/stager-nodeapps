@@ -49,7 +49,7 @@ http_interactions:
     http_version: 
   recorded_at: Wed, 14 Aug 2013 08:52:04 GMT
 - request:
-    method: post
+    method: put
     uri: http://example.com/meta
     body:
       encoding: US-ASCII

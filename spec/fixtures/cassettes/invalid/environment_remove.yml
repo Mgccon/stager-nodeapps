@@ -1,7 +1,7 @@
 ---
 http_interactions:
 - request:
-    method: post
+    method: put
     uri: http://example.com/meta
     body:
       encoding: US-ASCII
