@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {spec}/*`.split("\n")
   gem.name          = "apcera-stager-api"
   gem.require_paths = ["lib"]
-  gem.version       = "0.0.2"
+  gem.version       = "0.1.0"
 
   gem.add_development_dependency 'rspec', '~> 2.6.0'
   gem.add_development_dependency 'rake'
