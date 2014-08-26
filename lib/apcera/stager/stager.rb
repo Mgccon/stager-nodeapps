@@ -89,7 +89,7 @@ module Apcera
 
     # Add environment variable to package.
     def environment_add(key, value)
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "environment",
         :action => "add",
         :key => key,
@@ -101,7 +101,7 @@ module Apcera
 
     # Delete environment variable from package.
     def environment_remove(key, value)
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "environment",
         :action => "remove",
         :key => key,
@@ -113,7 +113,7 @@ module Apcera
 
     # Add provides to package.
     def provides_add(type, name)
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "provides",
         :action => "add",
         :type => type,
@@ -125,7 +125,7 @@ module Apcera
 
     # Delete provides from package.
     def provides_remove(key, value)
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "provides",
         :action => "remove",
         :type => type,
@@ -140,7 +140,7 @@ module Apcera
       exists = self.meta["dependencies"].detect { |dep| dep["type"] == type && dep["name"] == name }
       return false if exists
 
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "dependencies",
         :action => "add",
         :type => type,
@@ -157,7 +157,7 @@ module Apcera
       exists = self.meta["dependencies"].detect { |dep| dep["type"] == type && dep["name"] == name}
       return false if !exists
 
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "dependencies",
         :action => "remove",
         :type => type,
@@ -171,7 +171,7 @@ module Apcera
 
     # Add template to package.
     def templates_add(path, left_delimiter = "{{", right_delimiter = "}}")
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "templates",
         :action => "add",
         :path => path,
@@ -184,7 +184,7 @@ module Apcera
 
     # Delete template from package.
     def templates_remove(path, left_delimiter = "{{", right_delimiter = "}}")
-      response = RestClient.put(@stager_url+"/meta", {
+      response = RestClient.put(stager_meta_url, {
         :resource => "templates",
         :action => "remove",
         :path => path,
@@ -197,7 +197,7 @@ module Apcera
 
     # Get metadata for the package being staged.
     def meta
-      response = RestClient.get(@stager_url+"/meta")
+      response = RestClient.get(stager_meta_url)
       return JSON.parse(response.to_s)
     rescue => e
       output_error "Error: #{e.message}.\n"
@@ -284,6 +284,10 @@ module Apcera
       @pkg_path = File.join(@root_path, PKG_NAME)
       @updated_pkg_path = File.join(@root_path, UPDATED_PKG_NAME)
       @system_options = {}
+    end
+
+    def stager_meta_url
+      @stager_url + "/meta"
     end
   end
 end
