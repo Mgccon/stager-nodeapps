@@ -19,8 +19,8 @@ module Apcera
     def download
       uri = URI(@stager_url + "/data")
 
-      Net::HTTP.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri
+      Net::HTTP.start(uri.host.to_s, uri.port.to_s) do |http|
+        request = Net::HTTP::Get.new uri.request_uri
 
         http.request request do |response|
           if response.code.to_i == 200
