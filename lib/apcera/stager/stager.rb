@@ -15,10 +15,24 @@ module Apcera
     end
 
     # Download a package from the staging coordinator.
+    # We use Net::HTTP here because it supports streaming downloads.
     def download
-      response = RestClient.get(@stager_url + "/data")
-      File.open(@pkg_path, "wb") do |f|
-        f.write(response.to_str)
+      uri = URI(@stager_url + "/data")
+
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new uri
+
+        http.request request do |response|
+          if response.code.to_i == 200
+            open @pkg_path, 'wb' do |io|
+              response.read_body do |chunk|
+                io.write chunk
+              end
+            end
+          else
+            raise Apcera::Error::DownloadError.new("package download failed.\n")
+          end
+        end
       end
     rescue => e
       fail e

@@ -70,7 +70,7 @@ describe Apcera::Stager do
         @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('invalid/download') do
-          expect { @stager.download }.to raise_error(RestClient::ResourceNotFound, "404 Resource Not Found")
+          expect { @stager.download }.to raise_error(Apcera::Error::DownloadError, "package download failed.\n")
         end
       end
     end
