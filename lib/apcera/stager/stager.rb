@@ -74,7 +74,7 @@ module Apcera
 
       sha1 = Digest::SHA1.file(@updated_pkg_path)
       File.open(@updated_pkg_path, "rb") do |f|
-        response = RestClient.post(@stager_url+"/data?sha1=#{sha1.to_s}", f.read, { :content_type => "application/octet-stream" } )
+        response = RestClient.post(@stager_url+"/data?sha1=#{sha1.to_s}", f, { :content_type => "application/octet-stream" } )
       end
     rescue => e
       fail e
