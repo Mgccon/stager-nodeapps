@@ -1,9 +1,6 @@
 # continuum-stager-api
 
 Simple gem to assist users writing custom Continuum Stagers.
-An example sinatra stager is available at:
-
-https://github.com/apcera/sample-apps/tree/master/continuum-stager-api
 
 ## Usage
 
