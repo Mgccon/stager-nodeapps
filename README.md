@@ -1,16 +1,68 @@
 # continuum-stager-api
 
 Simple gem to assist users writing custom Continuum Stagers.
+An example sinatra stager is available at:
 
-## Installation
+https://github.com/apcera/sample-apps/tree/master/continuum-stager-api
 
-Add to your `Gemfile`:
+## Usage
+
+First create your Gemfile. The contents should be:
 
 ```ruby
+source "https://rubygems.org"
+
 gem "continuum-stager-api"
 ```
 
-Then `bundle install`.
+Then run `bundle install` to download and install the gem and its dependencies.
+
+Now that your environment is setup, create a new file for your stager. We recommend "stager.rb".
+
+Start off with the contents:
+
+```ruby
+#!/usr/bin/env ruby
+
+require "bundler"
+Bundler.setup
+
+require "continuum-stager-api"
+
+stager = Apcera::Stager.new
+
+# Download the package from the staging coordinator.
+# This is the code that requires staging!
+puts "Downloading Package..."
+stager.download
+
+# Extract the package to the "app" directory.
+puts "Extracting Package..."
+stager.extract("app")
+
+# Your custom staging logic goes here.
+# This will be a set of commands to execute in order to stage
+# your applications.
+
+# Finish staging, this will upload your final package to the
+# staging coordinator.
+puts "Completed Staging..."
+stager.complete
+```
+
+## Deploying
+
+Deploying just requires you to run `apc stager create`.
+
+```console
+apc stager create mystager --start-command="./stager.rb" --staging=/apcera::ruby --pipeline
+```
+
+Now you can deploy apps using your stager with `apc app create`.
+
+```console
+apc app create someapp --staging=mystager --start
+```
 
 ## License
 
