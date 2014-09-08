@@ -361,7 +361,7 @@ describe Apcera::Stager do
     context "environment_remove" do
       it "should environment_remove an environment variable" do
         VCR.use_cassette('environment_remove') do
-          @stager.environment_remove("TEST_VAR", "foo")
+          @stager.environment_remove("TEST_VAR")
         end
       end
 
@@ -369,7 +369,7 @@ describe Apcera::Stager do
         @stager.should_receive(:exit0r).with(1) { raise }
 
         VCR.use_cassette('invalid/environment_remove') do
-          expect { @stager.environment_remove("TEST_VAR", "foo") }.to raise_error
+          expect { @stager.environment_remove("TEST_VAR") }.to raise_error
         end
       end
     end

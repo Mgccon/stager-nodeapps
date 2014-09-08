@@ -114,12 +114,11 @@ module Apcera
     end
 
     # Delete environment variable from package.
-    def environment_remove(key, value)
+    def environment_remove(key)
       response = RestClient.put(stager_meta_url, {
         :resource => "environment",
         :action => "remove",
-        :key => key,
-        :value => value
+        :key => key
       })
     rescue => e
       fail e
