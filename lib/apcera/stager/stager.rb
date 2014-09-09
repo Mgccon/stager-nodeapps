@@ -137,7 +137,7 @@ module Apcera
     end
 
     # Delete provides from package.
-    def provides_remove(key, value)
+    def provides_remove(type, name)
       response = RestClient.put(stager_meta_url, {
         :resource => "provides",
         :action => "remove",
