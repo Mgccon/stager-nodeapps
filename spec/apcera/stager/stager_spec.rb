@@ -58,6 +58,19 @@ describe Apcera::Stager do
       FileUtils.rm_rf Dir.glob(test_files)
     end
 
+    context "setup_chroot" do
+      it "should setup a working chrooted environment in /stagerfs" do
+        @stager.should_receive(:execute).with("sudo mkdir -p /stagerfs/etc")
+        @stager.should_receive(:execute).with("sudo cp /etc/resolv.conf /stagerfs/etc/resolv.conf")
+        @stager.should_receive(:execute).with("sudo mkdir -p /stagerfs/proc")
+        @stager.should_receive(:execute).with("sudo mount --bind /proc /stagerfs/proc")
+        @stager.should_receive(:execute).with("sudo mkdir -p /stagerfs/dev")
+        @stager.should_receive(:execute).with("sudo mount --rbind /dev /stagerfs/dev")
+
+        @stager.setup_chroot
+      end
+    end
+
     context "download" do
       it "should download the app package to pkg.tar.gz" do
         VCR.use_cassette('download') do
