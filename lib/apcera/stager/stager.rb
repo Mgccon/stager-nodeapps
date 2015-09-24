@@ -14,6 +14,22 @@ module Apcera
       setup_environment
     end
 
+    # Setup /stagerfs chroot environment so it is ready to run commands
+    # from pulled in dependencies. This does the following:
+    # - Setup working resolv.conf
+    # - Bind mounts /proc to /stagerfs/proc
+    # - Recursively bind mounts /dev to /stagerfs/dev
+    def setup_chroot
+      execute("sudo mkdir -p /stagerfs/etc")
+      execute("sudo cp /etc/resolv.conf /stagerfs/etc/resolv.conf")
+
+      execute("sudo mkdir -p /stagerfs/proc")
+      execute("sudo mount --bind /proc /stagerfs/proc")
+
+      execute("sudo mkdir -p /stagerfs/dev")
+      execute("sudo mount --rbind /dev /stagerfs/dev")
+    end
+
     # Download a package from the staging coordinator.
     # We use Net::HTTP here because it supports streaming downloads.
     def download
