@@ -102,9 +102,9 @@ module Apcera
       app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
       execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
 
-      sha1 = Digest::SHA1.file(@updated_pkg_path)
+      sha256 = Digest::SHA256.file(@updated_pkg_path)
       File.open(@updated_pkg_path, "rb") do |f|
-        response = RestClient.post(@stager_url+"/data?sha1=#{sha1.to_s}", f, { :content_type => "application/octet-stream" } )
+        response = RestClient.post(@stager_url+"/data?sha256=#{sha256.to_s}", f, { :content_type => "application/octet-stream" } )
       end
     rescue => e
       fail e
