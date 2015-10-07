@@ -76,7 +76,7 @@ describe Apcera::Stager do
         VCR.use_cassette('download') do
           @stager.download
         end
-        File.exists?(@stager.pkg_path).should == true
+        File.exist?(@stager.pkg_path).should == true
       end
 
       it "should bubble errors to fail" do
@@ -98,7 +98,7 @@ describe Apcera::Stager do
       it "should decompress the package to a supplied path" do
         @stager.extract(@appdir)
         expected_path = File.join(@stager.root_path, @appdir)
-        File.exists?(expected_path).should == true
+        File.exist?(expected_path).should == true
         @stager.app_path.should == expected_path
       end
 
@@ -170,23 +170,25 @@ describe Apcera::Stager do
     end
 
     context "upload" do
-      before do
+      it "should compress a new package and send to the staging coordinator" do
         VCR.use_cassette('download') do
           @stager.download
         end
-      end
 
-      it "should compress a new package and send to the staging coordinator" do
         @stager.extract(@appdir)
 
         VCR.use_cassette('upload') do
           @stager.upload
         end
 
-        File.exists?(@stager.updated_pkg_path).should == true
+        File.exist?(@stager.updated_pkg_path).should be_true
       end
 
       it "should compress using tar czf" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
         @stager.extract(@appdir)
 
         @stager.should_receive(:execute_app).with("cd #{@stager.app_path}/.. && tar czf #{@stager.updated_pkg_path} #{@appdir}").and_return
@@ -194,14 +196,29 @@ describe Apcera::Stager do
         @stager.upload
       end
 
-      it "should bubble errors to fail when app path is missing (no extract)" do
-        @stager.should_receive(:exit0r).with(1) { raise }
+      it "should upload the original package when the app wasn't extracted" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
 
-        cmd = "cat thing"
-        expect {@stager.upload }.to raise_error(Apcera::Error::AppPathError, "app path not set, please run extract!\n")
+        @stager.should_not_receive(:download)
+        @stager.should_receive(:upload_file).with(@stager.pkg_path).and_return
+
+        @stager.upload
+      end
+
+      it "should upload the original package when the app wasn't downloaded or extracted" do
+        @stager.should_receive(:download).and_return
+        @stager.should_receive(:upload_file).with(@stager.pkg_path).and_return
+
+        @stager.upload
       end
 
       it "should bubble errors to fail" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
         @stager.should_receive(:exit0r).with(1) { raise }
 
         @stager.extract(@appdir)
@@ -226,7 +243,7 @@ describe Apcera::Stager do
           @stager.complete
         end
 
-        File.exists?(File.join(@stager.root_path, "#{@appdir}.tar.gz"))
+        File.exist?(File.join(@stager.root_path, "#{@appdir}.tar.gz"))
       end
 
       it "should bubble errors to fail" do
