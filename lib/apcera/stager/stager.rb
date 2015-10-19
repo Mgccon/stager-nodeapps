@@ -96,15 +96,21 @@ module Apcera
       fail e
     end
 
-    # Upload the new package to the staging coordinator
+    # Upload the new package to the staging coordinator. If we have an app extracted we
+    # send that to the staging coordinator. If no app was ever extracted we just
+    # upload the unmodified app.
     def upload
-      raise_app_path_error if @app_path == nil
-      app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
-      execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
+      if @app_path == nil
+        unless File.exist?(@pkg_path)
+          download
+        end
 
-      sha256 = Digest::SHA256.file(@updated_pkg_path)
-      File.open(@updated_pkg_path, "rb") do |f|
-        response = RestClient.post(@stager_url+"/data?sha256=#{sha256.to_s}", f, { :content_type => "application/octet-stream" } )
+        upload_file(@pkg_path)
+      else
+        app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
+        execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
+
+        upload_file(@updated_pkg_path)
       end
     rescue => e
       fail e
@@ -317,6 +323,13 @@ module Apcera
 
     def stager_meta_url
       @stager_url + "/meta"
+    end
+
+    def upload_file(file)
+      sha256 = Digest::SHA256.file(file)
+      File.open(file, "rb") do |f|
+        response = RestClient.post(@stager_url+"/data?sha256=#{sha256.to_s}", f, { :content_type => "application/octet-stream" } )
+      end
     end
   end
 end
