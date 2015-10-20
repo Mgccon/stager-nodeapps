@@ -1,6 +1,6 @@
-# continuum-stager-api
+# apcera-stager-api
 
-Simple gem to assist users writing custom Continuum Stagers.
+Simple gem to assist users writing stagers for the Apcera Platform.
 
 ## Usage
 
@@ -9,7 +9,7 @@ First create your Gemfile. The contents should be:
 ```ruby
 source "https://rubygems.org"
 
-gem "continuum-stager-api"
+gem "apcera-stager-api"
 ```
 
 Then run `bundle install` to download and install the gem and its dependencies.
@@ -24,7 +24,7 @@ Start off with the contents:
 require "bundler"
 Bundler.setup
 
-require "continuum-stager-api"
+require "apcera-stager-api"
 
 stager = Apcera::Stager.new
 

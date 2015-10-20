@@ -9,9 +9,9 @@ end
 require File.join('bundler', 'setup')
 require 'rspec'
 require 'vcr'
-require 'continuum-stager-api'
+require 'apcera-stager-api'
 
-root_path = File.join(Gem::Specification.find_by_name("continuum-stager-api").gem_dir, "spec")
+root_path = File.join(Gem::Specification.find_by_name("apcera-stager-api").gem_dir, "spec")
 
 VCR.configure do |c|
   c.cassette_library_dir = File.join(root_path, 'fixtures/cassettes')
