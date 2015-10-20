@@ -1,5 +1,6 @@
 require "bundler"
 Bundler.setup
+
 require 'rest-client'
 require 'json'
 
