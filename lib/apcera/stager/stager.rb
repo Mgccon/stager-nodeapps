@@ -69,11 +69,12 @@ module Apcera
       fail e
     end
 
-    # Execute a command in the app dir. Useful helper.
+    # Execute a command in the directory your package was extracted to (or where
+    # you manually set @app_dir). Useful helper.
     def execute_app(cmd)
-      raise_app_path_error if @app_path == nil
+      raise_app_path_error if @run_path == nil
       Bundler.with_clean_env do
-        Dir.chdir(@app_path) do |app_path|
+        Dir.chdir(@run_path) do |run_path|
           result = system(cmd, @system_options)
           if !result
             raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
@@ -86,19 +87,26 @@ module Apcera
       fail e
     end
 
-    # Extract the package to a given location.
-    def extract(location)
-      @app_path = File.join(@root_path, location)
+    # Extract the package to a location within staging path, optionally creating
+    # the named folder first and extract into it. If a location parameter is
+    # given, when upload is run the folder will be uploaded up along with the
+    # files.  In either case, execute_app will run commands in the location
+    # where files were extracted to.
+    def extract(location="")
+      @app_path=File.join(@root_path, "staging")
       Dir.mkdir(@app_path) unless Dir.exists?(@app_path)
+
+      @run_path = location.empty? ? @app_path : File.join(@app_path, location)
+      Dir.mkdir(@run_path) unless Dir.exists?(@run_path)
 
       execute_app("tar -zxf #{@pkg_path}")
     rescue => e
       fail e
     end
 
-    # Upload the new package to the staging coordinator. If we have an app extracted we
-    # send that to the staging coordinator. If no app was ever extracted we just
-    # upload the unmodified app.
+    # Upload the new package to the staging coordinator. If we have an app
+    # extracted we send that to the staging coordinator. If no app was ever
+    # extracted it is a noop.
     def upload
       if @app_path == nil
         unless File.exist?(@pkg_path)
@@ -107,8 +115,7 @@ module Apcera
 
         upload_file(@pkg_path)
       else
-        app_dir = Pathname.new(@app_path).relative_path_from(Pathname.new(@root_path)).to_s
-        execute_app("cd #{app_path}/.. && tar czf #{@updated_pkg_path} #{app_dir}")
+        execute_app("tar czf #{@updated_pkg_path} ./*")
 
         upload_file(@updated_pkg_path)
       end
@@ -116,7 +123,7 @@ module Apcera
       fail e
     end
 
-    # Snapshot the stager filesystem for app
+    # Snapshot the stager filesystem for app.
     def snapshot
       response = RestClient.post(@stager_url+"/snapshot", {})
     rescue => e
@@ -267,7 +274,7 @@ module Apcera
       self.meta["environment"]["START_COMMAND"]
     end
 
-    # Easily set the start command
+    # Easily set the start command.
     def start_command=(val)
       self.environment_add("START_COMMAND", val)
     end
@@ -277,7 +284,7 @@ module Apcera
       self.meta["environment"]["START_PATH"]
     end
 
-    # Easily set the start path
+    # Easily set the start path.
     def start_path=(val)
       self.environment_add("START_PATH", val)
     end
@@ -297,7 +304,7 @@ module Apcera
       exit code
     end
 
-    # Output to stderr
+    # Output to stderr.
     def output_error(text)
       $stderr.puts text
     end
@@ -305,6 +312,13 @@ module Apcera
     # Output to stdout
     def output(text)
       $stdout.puts text
+    end
+
+    # Set @app_path, the location that will uploaded.  Also updates location
+    # where execute_app will run commands from.
+    def app_path=(value)
+      @app_path=value
+      @run_path=value
     end
 
     private
