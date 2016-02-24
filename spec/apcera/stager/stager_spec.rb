@@ -97,7 +97,16 @@ describe Apcera::Stager do
 
       it "should decompress the package to a supplied path" do
         @stager.extract(@appdir)
-        expected_path = File.join(@stager.root_path, @appdir)
+        extracted_path = File.join(@stager.root_path, "staging", @appdir)
+        expected_path = File.join(@stager.root_path, "staging")
+
+        File.exist?(extracted_path).should == true
+        @stager.app_path.should == expected_path
+      end
+
+      it "should decompress the package without a supplied path" do
+        @stager.extract()
+        expected_path = File.join(@stager.root_path, "staging")
         File.exist?(expected_path).should == true
         @stager.app_path.should == expected_path
       end
@@ -125,7 +134,7 @@ describe Apcera::Stager do
         Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
 
         @stager.execute("cat thing").should == nil
-        @stager.execute("cat #{File.join(@stager.app_path, "app", "Gemfile")}").should == true
+        @stager.execute("cat #{File.join(@stager.app_path, @appdir, "app", "Gemfile")}").should == true
       end
 
       it "should bubble errors to fail" do
@@ -147,6 +156,15 @@ describe Apcera::Stager do
         Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
 
         @stager.extract(@appdir)
+
+        @stager.execute_app("cat thing").should == nil
+        @stager.execute_app("cat #{File.join("app", "Gemfile")}").should == true
+      end
+
+      it "should execute commands in extracted dir with clean bundler environment" do
+        Bundler.should_receive(:with_clean_env).at_least(:once).and_yield
+
+        @stager.extract()
 
         @stager.execute_app("cat thing").should == nil
         @stager.execute_app("cat #{File.join("app", "Gemfile")}").should == true
@@ -191,7 +209,7 @@ describe Apcera::Stager do
 
         @stager.extract(@appdir)
 
-        @stager.should_receive(:execute_app).with("cd #{@stager.app_path}/.. && tar czf #{@stager.updated_pkg_path} #{@appdir}").and_return
+        @stager.should_receive(:execute_app).with("tar czf #{@stager.updated_pkg_path} ./*").and_return
 
         @stager.upload
       end
