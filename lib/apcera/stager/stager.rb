@@ -56,11 +56,11 @@ module Apcera
 
     # Execute a command in the shell.
     # We don't want real commands in tests.
-    def execute(cmd)
+    def execute(*cmd)
       Bundler.with_clean_env do
-        result = system(cmd, @system_options)
+        result = system(*cmd, @system_options)
         if !result
-          raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+          raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd.join(' ')}.\n")
         end
 
         result
@@ -71,13 +71,13 @@ module Apcera
 
     # Execute a command in the directory your package was extracted to (or where
     # you manually set @app_dir). Useful helper.
-    def execute_app(cmd)
+    def execute_app(*cmd)
       raise_app_path_error if @run_path == nil
       Bundler.with_clean_env do
         Dir.chdir(@run_path) do |run_path|
-          result = system(cmd, @system_options)
+          result = system(*cmd, @system_options)
           if !result
-            raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd}.\n")
+            raise Apcera::Error::ExecuteError.new("failed to execute: #{cmd.join(' ')}.\n")
           end
 
           result
