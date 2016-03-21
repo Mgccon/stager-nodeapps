@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.version       = "0.3.2"
 
   gem.add_development_dependency 'rspec', '~> 2.6.0'
-  gem.add_development_dependency 'rake'
+  gem.add_development_dependency 'rake', '~> 10.5'
   gem.add_development_dependency 'webmock', '1.11'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'vcr'
