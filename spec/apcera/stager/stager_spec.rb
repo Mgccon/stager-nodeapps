@@ -209,9 +209,33 @@ describe Apcera::Stager do
 
         @stager.extract(@appdir)
 
-        @stager.should_receive(:execute_app).with("tar czf #{@stager.updated_pkg_path} ./*").and_return
+        @stager.should_receive(:execute).with("cd #{@stager.app_path} && tar czf #{@stager.updated_pkg_path} ./*").and_return
 
         @stager.upload
+      end
+
+      it "should upload files with a wrapping directory if extracted into one" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract(@appdir)
+        @stager.upload
+
+        out = `tar -tf #{@stager.updated_pkg_path}`
+        out.should include("./#{@appdir}/")
+      end
+
+      it "should upload files without a wrapping directory if not extracted into one" do
+        VCR.use_cassette('download') do
+          @stager.download
+        end
+
+        @stager.extract()
+        @stager.upload
+
+        out = `tar -tf #{@stager.updated_pkg_path}`
+        out.should_not include("./#{@appdir}/")
       end
 
       it "should upload the original package when the app wasn't extracted" do

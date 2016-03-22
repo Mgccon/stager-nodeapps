@@ -115,7 +115,10 @@ module Apcera
 
         upload_file(@pkg_path)
       else
-        execute_app("tar czf #{@updated_pkg_path} ./*")
+        # Use execute instead of execute_app so that if the user provided a dir
+        # to extract into it results in the uploaded package being wrapped in
+        # that directory.
+        execute("cd #{@app_path} && tar czf #{@updated_pkg_path} ./*")
 
         upload_file(@updated_pkg_path)
       end
